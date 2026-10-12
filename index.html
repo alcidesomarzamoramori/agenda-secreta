@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PERSONAL.EXE - Registro de Personal</title>
+<style>
+:root{--desk:#008080;--face:#c0c0c0;--hi:#fff;--lo:#808080;--dk:#000;--ttl:#000080;--ttl2:#1084d0;--ph:#33ff66}
+*{box-sizing:border-box}
+body{margin:0;padding:12px 12px 52px;min-height:100vh;background:var(--desk) radial-gradient(#0003 1px,transparent 1px) 0 0/4px 4px;font:14px/1.4 "Courier New",ui-monospace,Consolas,monospace;color:#000}
+h1,h2{margin:0;font-size:14px}
+.win{background:var(--face);border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);box-shadow:inset -1px -1px var(--lo),inset 1px 1px #dfdfdf,5px 5px 0 #0007;margin-bottom:14px}
+.tb{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:3px;padding:3px 6px;background:linear-gradient(90deg,var(--ttl),var(--ttl2));color:#fff;font-weight:bold}
+.tb i{font-style:normal;background:var(--face);color:#000;border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);padding:0 6px;line-height:1.1}
+.body{padding:10px}
+.main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+@media(max-width:900px){.main{grid-template-columns:minmax(0,1fr)}}
+fieldset{margin:0 0 10px;padding:8px;border:2px groove #fff}
+legend{padding:0 6px;font-weight:bold}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+label{display:block;font-size:13px}
+input,select,textarea{display:block;width:100%;margin-top:2px;padding:4px 6px;font:inherit;background:#fff;color:#000;border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo);box-shadow:inset 1px 1px var(--dk);border-radius:0}
+textarea{resize:vertical;min-height:54px}
+input:focus,select:focus,textarea:focus,.btn:focus-visible{outline:2px dotted #000;outline-offset:1px}
+.btn{font:inherit;color:#000;background:var(--face);padding:4px 12px;cursor:pointer;border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);box-shadow:inset -1px -1px var(--lo)}
+.btn:active{border-color:var(--dk) var(--hi) var(--hi) var(--dk);box-shadow:inset 1px 1px var(--lo);padding:5px 11px 3px 13px}
+.btn.pri{font-weight:bold}.btn.del{color:#a00000}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cf{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:end}
+.cf input{margin:0}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+#list{background:#fff;border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo);box-shadow:inset 1px 1px var(--dk);max-height:560px;overflow:auto}
+.item{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;padding:8px;border-bottom:1px dashed var(--lo)}
+.item{cursor:pointer}.item:hover,.item:focus-visible{background:#e8e8ff}
+.item small{color:#444}
+.acts{display:flex;gap:6px;flex-wrap:wrap}.acts .btn{padding:2px 8px}
+.empty{margin:0;padding:16px;background:#000;color:var(--ph)}
+.empty::after{content:"_";animation:bl 1s steps(1) infinite}
+@keyframes bl{50%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.empty::after{animation:none}}
+dialog{padding:0;border:0;background:none;width:min(580px,94vw);max-height:92vh;overflow:auto}
+dialog::backdrop{background:#000a}
+dialog .win{margin:0}
+table{width:100%;border-collapse:collapse;background:#fff;border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo)}
+th,td{padding:4px 8px;text-align:left;vertical-align:top;border-bottom:1px solid #ccc;overflow-wrap:anywhere}
+th{width:38%;font-weight:bold}
+tr.sec th{background:#000;color:var(--ph);width:auto}
+.bar{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-between;gap:10px;padding:6px 10px;background:var(--face);border-top:2px solid var(--hi);box-shadow:0 -1px var(--lo)}
+.bar span{padding:2px 8px;border:1px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo)}
+#msg{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+[hidden]{display:none!important}
+#lock{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:12px;background:var(--desk) radial-gradient(#0003 1px,transparent 1px) 0 0/4px 4px}
+#lock .win,#pd .win{width:min(430px,100%);margin:0}
+#pd{width:min(430px,94vw)}
+.warn{margin:0 0 8px;padding:6px;background:#000;color:#ffb000}
+#le{min-height:1.4em;margin:6px 0;color:#a00000;font-weight:bold}
+#pdF label{margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<div id="lock" hidden><form class="win" id="lf" autocomplete="off">
+  <div class="tb"><h2 id="lt">Acceso restringido</h2><i>x</i></div>
+  <div class="body">
+    <p id="lp"></p>
+    <p class="warn" id="lw" hidden>ATENCIÓN: no existe recuperación. Si olvidas esta contraseña, tus datos no se podrán recuperar.</p>
+    <label>Contraseña<input type="password" id="pw" required autocomplete="off"></label>
+    <label id="pw2l" style="margin-top:8px" hidden>Repetir contraseña<input type="password" id="pw2" autocomplete="off"></label>
+    <p id="le" role="alert"></p>
+    <button class="btn pri" id="lb">Entrar</button>
+  </div>
+</form></div>
+
+<div id="app" hidden>
+<div class="win">
+  <div class="tb"><h1>PERSONAL.EXE - Agenda y Registro de Personal de Trabajo</h1><i>_ &#9633; x</i></div>
+</div>
+
+<div class="main">
+  <!-- VENTANA 1: FORMULARIO -->
+  <section class="win">
+    <div class="tb"><h2 id="formTitle">Formulario de Alta</h2><i>x</i></div>
+    <form class="body" id="f" autocomplete="off">
+      <fieldset><legend>Datos personales</legend>
+        <div class="g">
+          <label>Nombre completo*<input name="nombre" required maxlength="80"></label>
+          <label>Apellidos*<input name="apellidos" required maxlength="80"></label>
+          <label>DNI / Documento*<input name="dni" required maxlength="30"></label>
+          <label>Teléfono*<input name="telefono" type="tel" required maxlength="30"></label>
+          <label>Correo electrónico*<input name="email" type="email" required maxlength="100"></label>
+          <label>Fecha de nacimiento*<input name="nacimiento" type="date" required></label>
+          <label>Altura (cm)*<input name="altura" type="number" min="30" max="260" step="0.1" required></label>
+          <label>Nombre del padre*<input name="padre" required maxlength="100"></label>
+          <label>Nombre de la madre*<input name="madre" required maxlength="100"></label>
+        </div>
+        <label style="margin-top:8px">Dirección*<input name="direccion" required maxlength="160"></label>
+      </fieldset>
+
+      <fieldset><legend>Atributos físicos / visuales</legend>
+        <div class="g">
+          <label>Color de ojos<input name="ojos" list="dl-ojos" maxlength="40"></label>
+          <label>Tipo / color de cabello<input name="cabello" list="dl-cab" maxlength="60"></label>
+          <label>Contextura física<input name="contextura" list="dl-ctx" maxlength="40"></label>
+        </div>
+        <label style="margin-top:8px">Otros rasgos distintivos<textarea name="rasgos" maxlength="400" placeholder="Cicatrices, tatuajes, lunares, lentes..."></textarea></label>
+        <datalist id="dl-ojos"><option>Marrón oscuro</option><option>Marrón claro</option><option>Negro</option><option>Verde</option><option>Azul</option><option>Gris</option><option>Ámbar</option></datalist>
+        <datalist id="dl-cab"><option>Negro liso</option><option>Negro ondulado</option><option>Castaño</option><option>Rubio</option><option>Pelirrojo</option><option>Canoso</option><option>Rizado</option><option>Calvo</option></datalist>
+        <datalist id="dl-ctx"><option>Delgada</option><option>Atlética</option><option>Media</option><option>Robusta</option><option>Corpulenta</option></datalist>
+      </fieldset>
+
+      <fieldset><legend>Campos personalizados</legend>
+        <div id="cfs"></div>
+        <button type="button" class="btn" id="addCf">+ Agregar campo personalizado</button>
+      </fieldset>
+
+      <div class="row">
+        <button class="btn pri" id="saveBtn" type="submit">Guardar registro</button>
+        <button class="btn" type="button" id="cancelBtn">Limpiar / Cancelar</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- VENTANA 2: BASE DE DATOS -->
+  <section class="win">
+    <div class="tb"><h2>Base de Datos de Personal</h2><i>x</i></div>
+    <div class="body">
+      <div class="tools">
+        <button class="btn" id="exp">Exportar Backup</button>
+        <button class="btn" id="imp">Importar Backup</button>
+        <input type="file" id="file" accept=".json,application/json" hidden>
+        <button class="btn" id="chBtn">Cambiar contraseña</button>
+        <button class="btn pri" id="lockBtn">Bloquear ahora</button>
+      </div>
+      <label style="margin-bottom:10px">Buscar por DNI, nombre o apellido<input id="q" type="search" placeholder="> escriba para filtrar..."></label>
+      <div id="list" aria-live="polite"></div>
+    </div>
+  </section>
+</div>
+</div>
+
+<dialog id="pd"><form class="win" id="pdForm">
+  <div class="tb"><h2 id="pdT"></h2></div>
+  <div class="body"><p id="pdN"></p><div id="pdF"></div>
+    <div class="row"><button class="btn pri">Aceptar</button><button type="button" class="btn" id="pdC">Cancelar</button></div>
+  </div>
+</form></dialog>
+
+<dialog id="dlg"><div class="win">
+  <div class="tb"><h2>Detalle del registro</h2><i id="x">x</i></div>
+  <div class="body"><div id="det"></div>
+    <div class="row" style="margin-top:10px"><button class="btn pri" id="dEdit">Editar</button><button class="btn" id="dClose">Cerrar</button></div>
+  </div>
+</div></dialog>
+
+<div class="bar"><span id="msg">LISTO.</span><span id="count"></span><span id="clock"></span></div>
+
+<script>
+const KEY = 'retro_personal_v1';
+const $ = s => document.querySelector(s);
+const F = [['nombre','Nombre'],['apellidos','Apellidos'],['dni','DNI / Documento'],['telefono','Teléfono'],['email','Correo'],['direccion','Dirección'],['nacimiento','Fecha de nacimiento'],['altura','Altura'],['padre','Padre'],['madre','Madre']];
+const P = [['ojos','Color de ojos'],['cabello','Cabello'],['contextura','Contextura'],['rasgos','Rasgos distintivos']];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => String(s ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const VK = 'retro_personal_v2', IT = 600000;
+let db = [], key = null, meta = null, editId = null, viewId = null;
+
+/* CRYPTO */
+const enc = new TextEncoder(), dec = new TextDecoder();
+const b64 = u => { u = new Uint8Array(u); let s = ''; for (let i = 0; i < u.length; i += 8192) s += String.fromCharCode(...u.subarray(i, i + 8192)); return btoa(s); };
+const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const okIt = n => Number.isInteger(n) && n >= 1e5 && n <= 2e6;
+const newMeta = () => ({ it: IT, salt: b64(crypto.getRandomValues(new Uint8Array(16))) });
+async function derive(pw, saltB64, it){
+  const m = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt: unb64(saltB64), iterations: it }, m, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+async function seal(obj, k, m, extra = {}){
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, k, enc.encode(JSON.stringify(obj)));
+  return { ...extra, v: 2, kdf: 'PBKDF2-SHA256', it: m.it, salt: m.salt, iv: b64(iv), ct: b64(ct) };
+}
+async function unseal(env, k){
+  if (!env || !okIt(env.it) || !env.salt || !env.iv || !env.ct) throw new Error('formato');
+  return JSON.parse(dec.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(env.iv) }, k, unb64(env.ct))));
+}
+/* /CRYPTO */
+const vault = () => { try { return JSON.parse(localStorage.getItem(VK)); } catch { return null; } };
+let saving = Promise.resolve();
+function save(){
+  const k = key, m = meta, snap = [...db];
+  return saving = saving.then(async () => {
+    try { localStorage.setItem(VK, JSON.stringify(await seal(snap, k, m))); return true; }
+    catch { msg('ERROR: no se pudieron guardar los datos cifrados.'); return false; }
+  });
+}
+function msg(t){ $('#msg').textContent = t; }
+
+/* ---------- Campos personalizados ---------- */
+function addCf(l = '', v = ''){
+  const d = document.createElement('div'); d.className = 'cf';
+  d.innerHTML = `<label>Etiqueta<input class="cl" maxlength="40" placeholder="Ej. Color favorito" value="${esc(l)}"></label><label>Valor<input class="cv" maxlength="120" value="${esc(v)}"></label><button type="button" class="btn" title="Quitar campo">X</button>`;
+  d.querySelector('button').onclick = () => d.remove();
+  $('#cfs').append(d);
+}
+$('#addCf').onclick = () => { addCf(); $('#cfs').lastChild.querySelector('input').focus(); };
+
+/* ---------- Formulario ---------- */
+function resetForm(){
+  $('#f').reset(); $('#cfs').innerHTML = ''; editId = null;
+  $('#formTitle').textContent = 'Formulario de Alta'; $('#saveBtn').textContent = 'Guardar registro';
+}
+$('#cancelBtn').onclick = () => { resetForm(); msg('Formulario limpio.'); };
+
+$('#f').onsubmit = async e => {
+  e.preventDefault();
+  const fd = new FormData(e.target), r = {};
+  [...F, ...P].forEach(([k]) => r[k] = String(fd.get(k) ?? '').trim());
+  if (db.some(x => x.id !== editId && norm(x.dni) === norm(r.dni))) { msg('ERROR: ya existe un registro con ese DNI.'); $('#f').dni.focus(); return; }
+  r.custom = [...document.querySelectorAll('#cfs .cf')].map(d => ({ label: d.querySelector('.cl').value.trim(), value: d.querySelector('.cv').value.trim() })).filter(c => c.label);
+  if (editId) { r.id = editId; db = db.map(x => x.id === editId ? r : x); }
+  else { r.id = uid(); db.push(r); }
+  const wasEdit = !!editId;
+  if (await save()) { msg(wasEdit ? 'Registro actualizado.' : 'Registro guardado.'); resetForm(); render(); }
+};
+
+function edit(id){
+  const r = db.find(x => x.id === id); if (!r) return;
+  resetForm(); editId = id;
+  [...F, ...P].forEach(([k]) => $('#f').elements[k].value = r[k] ?? '');
+  (r.custom || []).forEach(c => addCf(c.label, c.value));
+  $('#formTitle').textContent = 'Formulario de Edición'; $('#saveBtn').textContent = 'Actualizar registro';
+  msg('Editando: ' + r.nombre + ' ' + r.apellidos);
+  $('#f').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ---------- Lista y búsqueda ---------- */
+function render(){
+  const t = norm($('#q').value.trim());
+  const rows = db.filter(r => !t || norm(`${r.nombre} ${r.apellidos} ${r.dni}`).includes(t))
+    .sort((a, b) => norm(a.apellidos + a.nombre).localeCompare(norm(b.apellidos + b.nombre)));
+  $('#list').innerHTML = rows.length ? rows.map(r => `<div class="item" data-a="v" data-id="${esc(r.id)}" tabindex="0" title="Clic para ver el detalle"><div><b>${esc(r.apellidos)}, ${esc(r.nombre)}</b><br><small>DNI ${esc(r.dni)} | Tel ${esc(r.telefono)}</small></div><div class="acts"><button class="btn" data-a="v" data-id="${esc(r.id)}">Ver</button><button class="btn" data-a="e" data-id="${esc(r.id)}">Editar</button><button class="btn del" data-a="d" data-id="${esc(r.id)}">Eliminar</button></div></div>`).join('')
+    : `<p class="empty">&gt; ${db.length ? 'Sin coincidencias.' : 'Base de datos vacía. Registre a la primera persona.'}</p>`;
+  $('#count').textContent = rows.length + '/' + db.length + ' reg.';
+}
+$('#q').oninput = render;
+$('#list').onclick = e => {
+  const b = e.target.closest('[data-a]'); if (!b) return;
+  const id = b.dataset.id;
+  if (b.dataset.a === 'v') view(id);
+  else if (b.dataset.a === 'e') edit(id);
+  else del(id);
+};
+$('#list').onkeydown = e => {
+  if (e.target.classList.contains('item') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); view(e.target.dataset.id); }
+};
+$('#dlg').onclick = e => { if (e.target === e.currentTarget) $('#dlg').close(); };
+
+async function del(id){
+  const r = db.find(x => x.id === id); if (!r) return;
+  if (!confirm(`¿Eliminar a ${r.nombre} ${r.apellidos}? Esta acción no se puede deshacer.`)) return;
+  db = db.filter(x => x.id !== id);
+  if (editId === id) resetForm();
+  if (await save()) { msg('Registro eliminado.'); render(); }
+}
+
+/* ---------- Detalle ---------- */
+function age(s){ const b = new Date(s); if (isNaN(b)) return ''; const n = new Date(); let a = n.getFullYear() - b.getFullYear(); if (n < new Date(n.getFullYear(), b.getMonth(), b.getDate())) a--; return a >= 0 ? ` (${a} años)` : ''; }
+function view(id){
+  const r = db.find(x => x.id === id); if (!r) return; viewId = id;
+  const tr = (l, v) => `<tr><th>${esc(l)}</th><td>${esc(v) || '-'}</td></tr>`;
+  const sec = t => `<tr class="sec"><th colspan="2">${t}</th></tr>`;
+  let h = '<table>' + sec('DATOS PERSONALES');
+  F.forEach(([k, l]) => h += tr(l, k === 'altura' && r[k] ? r[k] + ' cm' : k === 'nacimiento' && r[k] ? r[k] + age(r[k]) : r[k]));
+  h += sec('ATRIBUTOS FÍSICOS') + P.map(([k, l]) => tr(l, r[k])).join('');
+  if ((r.custom || []).length) h += sec('CAMPOS PERSONALIZADOS') + r.custom.map(c => tr(c.label, c.value)).join('');
+  $('#det').innerHTML = h + '</table>';
+  $('#dlg').showModal();
+}
+$('#x').onclick = $('#dClose').onclick = () => $('#dlg').close();
+$('#dEdit').onclick = () => { $('#dlg').close(); edit(viewId); };
+
+/* ---------- Backup ---------- */
+$('#exp').onclick = async () => {
+  if (!db.length) { msg('No hay registros para exportar.'); return; }
+  const data = JSON.stringify(await seal(db, key, meta, { app: 'PERSONAL.EXE', tipo: 'backup-cifrado', exportado: new Date().toISOString() }), null, 2);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
+  a.download = 'backup_cifrado_' + new Date().toISOString().slice(0, 10) + '.json';
+  document.body.append(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+  msg('Backup exportado (' + db.length + ' registros).');
+};
+$('#imp').onclick = () => $('#file').click();
+$('#file').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = async () => {
+    try {
+      const j = JSON.parse(rd.result); let arr;
+      if (j && j.ct && j.iv && j.salt) {
+        let k = key;
+        if (j.salt !== meta.salt || j.it !== meta.it) {
+          const r = await ask('Contraseña del backup', ['Contraseña con la que se exportó'], 'Este backup se cifró con otra contraseña.');
+          if (!r) throw 'cancel';
+          if (!okIt(j.it)) throw new Error('it');
+          k = await derive(r[0], j.salt, j.it);
+        }
+        arr = await unseal(j, k);
+      } else arr = Array.isArray(j) ? j : j.registros;
+      if (!Array.isArray(arr)) throw 0;
+      const ok = arr.filter(r => r && typeof r === 'object' && r.nombre && r.dni).map(r => ({
+        ...r, id: String(r.id || uid()),
+        custom: Array.isArray(r.custom) ? r.custom.filter(c => c && c.label).map(c => ({ label: String(c.label), value: String(c.value ?? '') })) : []
+      }));
+      if (!ok.length) throw 0;
+      const rep = confirm(`Se encontraron ${ok.length} registros.\n\nAceptar = REEMPLAZAR todos los datos actuales.\nCancelar = COMBINAR con los existentes (mismo ID se sobrescribe).`);
+      if (rep) db = ok; else { const m = new Map(db.map(r => [r.id, r])); ok.forEach(r => m.set(r.id, r)); db = [...m.values()]; }
+      if (await save()) { resetForm(); render(); msg('Backup importado: ' + ok.length + ' registros.'); }
+    } catch (err) { msg(err === 'cancel' ? 'Importación cancelada.' : 'ERROR: backup inválido o contraseña incorrecta.'); }
+    e.target.value = '';
+  };
+  rd.readAsText(f);
+};
+
+/* ---------- Reloj e inicio ---------- */
+const tick = () => $('#clock').textContent = new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+tick(); setInterval(tick, 30000);
+
+/* ---------- Bóveda: acceso, bloqueo y contraseña ---------- */
+let fails = 0, until = 0, idle;
+function showLock(){
+  const setup = !vault();
+  $('#app').hidden = true; $('#lock').hidden = false;
+  $('#lt').textContent = setup ? 'Crear bóveda' : 'Acceso restringido';
+  $('#lp').textContent = setup ? 'Crea la contraseña maestra que cifrará tus registros y backups.' : 'Introduce tu contraseña para abrir la agenda.';
+  $('#lw').hidden = !setup; $('#pw2l').hidden = !setup; $('#pw2').required = setup;
+  $('#lb').textContent = setup ? 'Crear y entrar' : 'Entrar';
+  $('#pw').value = $('#pw2').value = ''; $('#le').textContent = ''; $('#pw').focus();
+}
+$('#lf').onsubmit = async e => {
+  e.preventDefault();
+  const wait = until - Date.now(), setup = !vault(), pw = $('#pw').value, err = $('#le');
+  if (wait > 0) { err.textContent = `Espera ${Math.ceil(wait / 1000)} s para reintentar.`; return; }
+  if (setup) {
+    if (pw.length < 8) { err.textContent = 'La contraseña debe tener al menos 8 caracteres.'; return; }
+    if (pw !== $('#pw2').value) { err.textContent = 'Las contraseñas no coinciden.'; return; }
+  }
+  $('#lb').disabled = true; err.textContent = 'Procesando...';
+  try {
+    if (setup) {
+      meta = newMeta(); key = await derive(pw, meta.salt, meta.it); db = [];
+      try { const old = JSON.parse(localStorage.getItem(KEY)); if (Array.isArray(old)) db = old; } catch {}
+      if (!await save()) throw new Error('save');
+      localStorage.removeItem(KEY);
+    } else {
+      const v = vault(); if (!v || !okIt(v.it)) throw new Error('vault');
+      key = await derive(pw, v.salt, v.it); db = await unseal(v, key); meta = { it: v.it, salt: v.salt };
+      if (!Array.isArray(db)) throw new Error('data');
+    }
+    fails = 0; $('#lock').hidden = true; $('#app').hidden = false; $('#pw').value = $('#pw2').value = '';
+    render(); bump(); msg(setup ? 'Bóveda creada. Datos cifrados con AES-256.' : 'Bóveda abierta.');
+  } catch {
+    key = null; db = []; meta = null; fails++; until = Date.now() + Math.min(fails * 2, 30) * 1000;
+    err.textContent = setup ? 'No se pudo crear la bóveda.' : 'Contraseña incorrecta (o datos dañados).';
+  } finally { $('#lb').disabled = false; }
+};
+function bump(){ clearTimeout(idle); if (key) idle = setTimeout(lock, 5 * 60 * 1000); }
+['click', 'keydown', 'mousemove', 'touchstart'].forEach(t => addEventListener(t, bump, { passive: true }));
+function lock(){
+  if (!key) return;
+  key = null; meta = null; db = []; editId = viewId = null; clearTimeout(idle);
+  $('#dlg').close(); $('#pd').close(); resetForm();
+  $('#q').value = ''; $('#list').innerHTML = ''; $('#det').innerHTML = '';
+  showLock(); msg('Agenda bloqueada.');
+}
+$('#lockBtn').onclick = lock;
+
+function ask(title, labels, note = ''){
+  return new Promise(res => {
+    const d = $('#pd'), f = $('#pdForm');
+    $('#pdT').textContent = title; $('#pdN').textContent = note;
+    $('#pdF').innerHTML = labels.map(l => `<label>${esc(l)}<input type="password" autocomplete="off" required></label>`).join('');
+    d.returnValue = '';
+    f.onsubmit = e => { e.preventDefault(); const v = [...f.querySelectorAll('input')].map(i => i.value); d.close('ok'); res(v); };
+    $('#pdC').onclick = () => d.close();
+    d.onclose = () => { $('#pdF').innerHTML = ''; res(null); };
+    d.showModal(); f.querySelector('input').focus();
+  });
+}
+$('#chBtn').onclick = async () => {
+  const r = await ask('Cambiar contraseña', ['Contraseña actual', 'Nueva contraseña (mín. 8)', 'Repetir nueva contraseña'], 'Los backups antiguos seguirán pidiendo la contraseña con la que se exportaron.');
+  if (!r) return;
+  try { await unseal(vault(), await derive(r[0], meta.salt, meta.it)); } catch { msg('ERROR: la contraseña actual no es correcta.'); return; }
+  if (r[1].length < 8) { msg('ERROR: la nueva contraseña debe tener al menos 8 caracteres.'); return; }
+  if (r[1] !== r[2]) { msg('ERROR: las contraseñas nuevas no coinciden.'); return; }
+  const m = newMeta(); key = await derive(r[1], m.salt, m.it); meta = m;
+  if (await save()) msg('Contraseña cambiada. Datos re-cifrados.');
+};
+showLock();
+</script>
+</body>
+</html>

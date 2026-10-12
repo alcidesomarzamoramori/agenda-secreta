@@ -1,0 +1,16 @@
+{
+  "name": "agenda-secreta",
+  "productName": "PERSONAL.EXE",
+  "version": "1.0.0",
+  "description": "Agenda y Registro de Personal de Trabajo",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-packager . PERSONAL --platform=win32 --arch=x64 --out=dist --overwrite --icon=icon.ico"
+  },
+  "devDependencies": {
+    "@electron/packager": "^20.3.0",
+    "electron": "^44.7.0"
+  },
+  "private": true
+}

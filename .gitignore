@@ -1,0 +1,14 @@
+# Dependencias y compilados (se regeneran; el .exe va en GitHub Releases)
+node_modules/
+dist/
+out/
+*.zip
+
+# NUNCA subir datos ni backups (contienen datos personales)
+backup_*.json
+backup_cifrado_*.json
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.log
